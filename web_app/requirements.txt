@@ -1,21 +1,24 @@
-# web app requirements
-Flask==2.3.3
-Flask-CORS==4.0.0
-Flask-SQLAlchemy==3.0.5
-Flask-Login==0.6.3
-Flask-WTF==1.1.1
-Flask-SocketIO==5.3.6
-Werkzeug==2.3.7
-python-dotenv==1.0.0
-bcrypt==4.0.1
-PyJWT==2.8.0
-eventlet==0.33.3
+# Python 3.6 兼容版本 - 保留完整OpenAI功能
+Flask==2.2.5                    # 兼容Python 3.6
+Flask-CORS==3.0.10              # 兼容Python 3.6
+Flask-SQLAlchemy==2.5.1         # 使用SQLAlchemy 1.4 (兼容Python 3.6)
+Flask-Login==0.6.3              # 兼容Python 3.6
+Flask-WTF==1.1.1                # 兼容Python 3.6
+Flask-SocketIO==5.1.1           # 兼容Python 3.6
+Werkzeug==2.2.3                 # 兼容Python 3.6
+python-dotenv==0.21.1           # 兼容Python 3.6
+bcrypt==3.2.2                   # 兼容Python 3.6
+PyJWT==2.4.0                    # 兼容Python 3.6
+eventlet==0.33.0                # 兼容Python 3.6
 
-# original project dependencies
-openai>=1.0.0
-aiohttp>=3.8.0
-requests>=2.25.0
+# 网络库 - OpenAI功能核心依赖 (Python 3.6兼容)
+requests==2.28.2                # 用于直接调用OpenAI API
+aiohttp==3.8.6                  # 异步HTTP支持
+pytz==2022.7.1                  # 时区处理
 
-# dev dependencies
-pytest>=7.0.0
-pytest-asyncio>=0.21.0
+# 开发依赖 (Python 3.6兼容)
+pytest==7.0.1
+pytest-asyncio==0.18.3
+
+# 注意：不需要安装openai库，代码直接使用requests调用OpenAI API
+# 这样既兼容Python 3.6，又完全保留所有OpenAI智能干预功能

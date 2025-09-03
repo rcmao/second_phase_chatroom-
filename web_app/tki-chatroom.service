@@ -1,0 +1,45 @@
+[Unit]
+Description=TKI Smart Chatroom Application
+Documentation=https://github.com/your-org/tki-chatroom
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+User=root
+Group=root
+WorkingDirectory=/root/first_phase_chatroom_v1/web_app
+Environment=PATH=/root/anaconda3/bin:/usr/local/bin:/usr/bin:/bin
+Environment=FLASK_ENV=production
+Environment=SECRET_KEY=your-secret-key-here-change-in-production
+Environment=PYTHONPATH=/root/first_phase_chatroom_v1/web_app:/root/first_phase_chatroom_v1
+
+# 使用Gunicorn运行应用
+ExecStart=/root/anaconda3/bin/gunicorn --config gunicorn.conf.py wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# 进程管理
+Restart=always
+RestartSec=3
+KillMode=mixed
+TimeoutStopSec=30
+
+# 资源限制
+LimitNOFILE=65535
+LimitNPROC=4096
+
+# 日志管理
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tki-chatroom
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/root/first_phase_chatroom_v1/web_app/logs
+ReadWritePaths=/root/first_phase_chatroom_v1/web_app/instance
+ReadWritePaths=/root/first_phase_chatroom_v1/web_app/chatbot.db
+
+[Install]
+WantedBy=multi-user.target

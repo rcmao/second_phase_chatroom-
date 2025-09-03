@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 TKI智能干预聊天机器人 Web应用启动脚本
 """
@@ -46,7 +47,7 @@ def create_default_data():
         test1_user = User.query.filter_by(username='test1_m').first()
         if not test1_user:
             test1_user = User(
-                username='test1m',
+                username='test1_m',  # 修复：改为 test1_m
                 email='test1_m@tki.com',
                 password_hash=generate_password_hash('test123'),
                 role='member',
@@ -130,11 +131,11 @@ def main():
         print("🚀 实时监控系统已启动")
         
         # 重要：关闭debug和自动重载，避免多进程导致Socket.IO房间/广播不一致
-        socketio.run(app, debug=False, host='0.0.0.0', port=8080, use_reloader=False)
+        socketio.run(app, debug=False, host='0.0.0.0', port=8090, use_reloader=False)
     except KeyboardInterrupt:
         pass
     except Exception as e:
         pass
 
 if __name__ == '__main__':
-    main() 
+    main()

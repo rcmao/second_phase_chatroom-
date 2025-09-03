@@ -1,10 +1,15 @@
 #!/bin/bash
 
 # 简单启动脚本 - 永远不会出现LLM配置错误
-cd /Users/apple/Desktop/first_phase_chatroom
+#cd /Users/apple/Desktop/first_phase_chatroom
+cd /root/first_phase_chatroom_v1
+
 
 # 激活虚拟环境
-source .venv/bin/activate
+#source .venv/bin/activate
+conda activate chatbot
+
+clash on
 
 # 设置Python路径
 export PYTHONPATH="$PWD:$PWD/web_app:$PWD/src"

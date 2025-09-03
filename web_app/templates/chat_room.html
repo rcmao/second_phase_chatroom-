@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+tong gx<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -1287,8 +1287,8 @@
             }
             
             // 统一连接到8080端口的WebSocket服务器
-            // 不管当前页面在哪个端口，都连到8080
-            const wsBase = `${window.location.protocol}//${window.location.hostname}:8080`;
+            // 不管当前页面在哪个端口，都连到8090
+            const wsBase = `${window.location.protocol}//${window.location.hostname}:8090`;
             console.log('WebSocket连接地址:', wsBase);
             console.log('使用token:', token.substring(0, 20) + '...');
             
@@ -1603,10 +1603,14 @@
                     return;
                 }
 
-            // 如果已经渲染过相同client_id的消息则跳过，避免重复
-            if (data.client_id && messagesContainer.querySelector(`[data-client-id="${data.client_id}"]`)) {
+            // 消息去重逻辑：防止乐观渲染和WebSocket回显导致的重复显示
+            if (data.client_id && !data.client_id.startsWith('history-') && messagesContainer.querySelector(`[data-client-id="${data.client_id}"]`)) {
+                console.log('跳过重复消息:', data.client_id, data.content);
                 return;
             }
+            
+            // 为所有消息添加调试日志
+            console.log('正在渲染消息:', data.author, data.content, 'client_id:', data.client_id);
             
             // 清除欢迎消息
             if (messagesContainer.children.length === 1 && 
@@ -1789,22 +1793,54 @@
         // 加载消息历史
         async function loadMessages() {
             try {
+                console.log('开始加载消息，房间ID:', currentRoomId);
                 const ts = Date.now();
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    console.error('缺少认证token');
+                    return;
+                }
+                
                 const response = await fetch(`/api/rooms/${currentRoomId}/messages?t=${ts}`, {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Cache-Control': 'no-cache'
                     }
                 });
                 
+                console.log('消息API响应状态:', response.status);
+                
                 if (response.ok) {
                     const messages = await response.json();
+                    console.log('获取到消息数量:', messages.length);
+                    console.log('消息详情:', messages.map(m => `${m.author}: ${m.content.substring(0, 30)}`));
+                    
                     const messagesContainer = document.getElementById('chatMessages');
                     messagesContainer.innerHTML = '';
                     
-                    messages.forEach(msg => {
+                    messages.forEach((msg, index) => {
+                        console.log(`添加消息${index + 1}: [${msg.author}] ${msg.content}`, 'client_id:', msg.client_id);
+                        // 强制为每个消息设置唯一的client_id
+                        if (!msg.client_id) {
+                            msg.client_id = `history-${msg.id}`;
+                        }
                         addMessage(msg);
                     });
+                    
+                    console.log(`✅ 成功渲染 ${messages.length} 条消息`);
+                    
+                    // 滚动到底部
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                } else {
+                    const errorText = await response.text();
+                    console.error('加载消息失败:', response.status, errorText);
+                    
+                    // 如果是认证失败，尝试重新登录
+                    if (response.status === 401) {
+                        console.log('认证失败，尝试重新登录...');
+                        // 可以在这里添加重新登录逻辑
+                    }
                 }
             } catch (error) {
                 console.error('加载消息失败:', error);

@@ -794,9 +794,9 @@ class SmartInterventionEngine:
         self.per_user_conflict_throttle_seconds = 30
         
         # === 活跃讨论保护 ===
-        self.active_discussion_window_seconds = 60
+        self.active_discussion_window_seconds = 120
         self.active_discussion_min_unique_users = 2
-        self.active_discussion_min_msg_per_minute = 0.5
+        self.active_discussion_min_msg_per_minute = 1.5
         
         # === 话题拉回冷却 ===
         self.room_last_generic_pullback_ts = {}
@@ -1187,7 +1187,7 @@ class SmartInterventionEngine:
             return False
         now = time.time()
         window_msgs = [m for m in recent_messages if now - m.get('timestamp', now) <= self.active_discussion_window_seconds]
-        if len(window_msgs) < 2:
+        if len(window_msgs) < 3:
             return False
         unique_users = len(set(m.get('user_id') for m in window_msgs))
         msgs_per_min = len(window_msgs) / max(1.0, self.active_discussion_window_seconds / 60.0)
@@ -1830,14 +1830,14 @@ class SmartInterventionEngine:
         if self._is_global_cooldown_active(room_id, current_time):
             return None
         
-        # 沉默检测 - 只在非活跃讨论时进行
+        # 沉默检测
         if not self._is_active_discussion(room_id):
             silence_result = self._check_silence_intervention(room_id)
-            if silence_result and silence_result.should_intervene:
-                if not self._is_duplicate_message(room_id, silence_result.message):
-                    self._record_intervention_message(room_id, silence_result.message)
-                    self.room_last_intervention_ts[room_id] = current_time
-                    return silence_result
+        if silence_result and silence_result.should_intervene:
+            if not self._is_duplicate_message(room_id, silence_result.message):
+                self._record_intervention_message(room_id, silence_result.message)
+                self.room_last_intervention_ts[room_id] = current_time
+                return silence_result
         
         # 议程过渡检测
         agenda_result = self._check_agenda_transition(room_id)
@@ -2800,21 +2800,10 @@ class SmartInterventionEngine:
     def _is_admin_user(self, user_id: str) -> bool:
         """检查用户是否是管理员"""
         try:
-            # 优先尝试查询数据库获取最新的管理员信息
-            try:
-                from flask import current_app
-                if current_app:
-                    # 导入User模型（延迟导入避免循环依赖）
-                    from app import User, db
-                    with current_app.app_context():
-                        user = User.query.get(int(user_id))
-                        if user:
-                            return user.role == 'admin'
-            except Exception as e:
-                print(f"⚠️ [管理员检查] 数据库查询失败: {e}")
-            
-            # 如果数据库查询失败，使用已知的管理员ID列表作为后备
-            admin_user_ids = {'1', '5', '6', '8', '9', '10'}  # 管理员用户ID列表
+            # 这里需要查询数据库来检查用户是否是管理员
+            # 由于在智能引擎中，我们使用简单的方法：假设user_id >= 8的是管理员
+            # 或者可以维护一个管理员ID列表
+            admin_user_ids = {'8', '9', '10'}  # 管理员用户ID列表
             return str(user_id) in admin_user_ids
         except Exception:
             return False

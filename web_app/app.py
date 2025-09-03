@@ -118,7 +118,7 @@ except ImportError as e:
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chatbot.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/chatbot.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['INTERVENTION_ENABLED'] = True  # ← 默认开启
 
@@ -1532,8 +1532,17 @@ def handle_join_room(data):
         except Exception as e:
             print(f'Flask-SocketIO加入房间失败: {e}')
         
-        # 房间加入成功，不再发送系统消息给用户
-        print(f'✅ 用户已成功加入房间 {room}，手动房间管理系统工作正常')
+        # 验证房间加入结果
+        print(f'✅ 手动房间管理验证:')
+        print(f'   room_clients[{room}]: {room_clients.get(room, [])}')
+        print(f'   manual_room_mapping[{request.sid}]: {manual_room_mapping.get(request.sid, "未找到")}')
+        
+        # 发送确认消息给客户端
+        socketio.emit('room_joined', {
+            'room': room, 
+            'client_id': request.sid,
+            'message': f'成功加入房间 {room}'
+        }, to=request.sid)
         
         # 更新用户状态
         user_id = session.get('user_id')
@@ -2540,6 +2549,37 @@ def test_broadcast():
 def test_chat():
     """测试聊天页面"""
     return render_template('test_chat_simple.html')
+
+@app.route('/test_messages')
+def test_messages_page():
+    """测试消息页面"""
+    return send_from_directory('.', 'test_messages.html')
+
+@app.route('/test_db_messages')
+def test_db_messages():
+    """直接测试数据库消息查询"""
+    try:
+        messages = Message.query.all()
+        result = f"数据库中共有 {len(messages)} 条消息:\n"
+        for msg in messages:
+            result += f"ID:{msg.id}, 内容:{msg.content[:50]}, 房间:{msg.room_id}, 时间:{msg.timestamp}\n"
+        return result
+    except Exception as e:
+        return f"查询失败: {str(e)}"
+
+@app.route('/test_websocket')
+def test_websocket():
+    """WebSocket连接测试页面"""
+    with open('test_websocket.html', 'r', encoding='utf-8') as f:
+        content = f.read()
+    return content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+
+@app.route('/debug_messages')
+def debug_messages():
+    """消息调试页面"""
+    with open('debug_messages.html', 'r', encoding='utf-8') as f:
+        content = f.read()
+    return content, 200, {'Content-Type': 'text/html; charset=utf-8'}
 
 @app.route('/test_send_message', methods=['POST'])
 def test_send_message():

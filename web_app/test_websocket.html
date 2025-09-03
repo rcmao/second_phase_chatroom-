@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket连接测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffeeee; border: 1px solid #ff0000; }
+        .success { background: #eeffee; border: 1px solid #00ff00; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        input[type="text"] { padding: 8px; width: 200px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket连接测试</h1>
+    
+    <div>
+        <input type="text" id="usernameInput" placeholder="用户名" value="tester">
+        <input type="text" id="passwordInput" placeholder="密码" value="tester123">
+        <button onclick="login()">登录</button>
+        <button onclick="connectWS()">连接WebSocket</button>
+        <button onclick="joinRoom()">加入房间1</button>
+        <button onclick="sendMessage()">发送测试消息</button>
+        <button onclick="clearLogs()">清空日志</button>
+    </div>
+    
+    <div>
+        房间: <input type="number" id="roomInput" value="1" min="1">
+        消息: <input type="text" id="messageInput" placeholder="输入消息" value="WebSocket测试消息">
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        let socket = null;
+        let token = null;
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logs.appendChild(div);
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        async function login() {
+            const username = document.getElementById('usernameInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            try {
+                log('正在登录...', 'info');
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    log(`登录成功! Token: ${token.substring(0, 30)}...`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`登录失败: ${response.status} - ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`登录错误: ${error}`, 'error');
+            }
+        }
+        
+        function connectWS() {
+            if (!token) {
+                log('请先登录获取token', 'error');
+                return;
+            }
+            
+            if (socket) {
+                socket.disconnect();
+                log('断开现有WebSocket连接', 'info');
+            }
+            
+            log('正在连接WebSocket...', 'info');
+            socket = io('http://localhost:8090', {
+                query: { token: token },
+                transports: ['websocket', 'polling'],
+                upgrade: true,
+                rememberUpgrade: true
+            });
+            
+            socket.on('connect', () => {
+                log(`WebSocket连接成功! Socket ID: ${socket.id}`, 'success');
+                log(`传输方式: ${socket.io.engine.transport.name}`, 'info');
+            });
+            
+            socket.on('disconnect', (reason) => {
+                log(`WebSocket断开连接: ${reason}`, 'error');
+            });
+            
+            socket.on('connect_error', (error) => {
+                log(`WebSocket连接错误: ${error}`, 'error');
+            });
+            
+            socket.on('message', (data) => {
+                log(`收到消息: ${JSON.stringify(data)}`, 'success');
+            });
+            
+            socket.on('test', (data) => {
+                log(`收到测试消息: ${JSON.stringify(data)}`, 'info');
+            });
+        }
+        
+        function joinRoom() {
+            if (!socket || !socket.connected) {
+                log('WebSocket未连接', 'error');
+                return;
+            }
+            
+            const roomId = document.getElementById('roomInput').value;
+            log(`正在加入房间 ${roomId}...`, 'info');
+            
+            socket.emit('join_room', { room: roomId });
+            
+            // 监听是否有响应
+            setTimeout(() => {
+                log('加入房间请求已发送，检查服务器日志确认', 'info');
+            }, 1000);
+        }
+        
+        function sendMessage() {
+            if (!socket || !socket.connected) {
+                log('WebSocket未连接', 'error');
+                return;
+            }
+            
+            const roomId = document.getElementById('roomInput').value;
+            const message = document.getElementById('messageInput').value;
+            
+            const messageData = {
+                room: roomId,
+                message: {
+                    content: message,
+                    author: 'TestUser',
+                    timestamp: new Date().toISOString(),
+                    client_id: `test-${Date.now()}`
+                }
+            };
+            
+            log(`发送消息到房间 ${roomId}: ${message}`, 'info');
+            socket.emit('send_message', messageData);
+        }
+        
+        // 页面加载时自动尝试使用现有token
+        window.onload = function() {
+            const savedToken = localStorage.getItem('token');
+            if (savedToken) {
+                token = savedToken;
+                log(`找到保存的token: ${token.substring(0, 30)}...`, 'info');
+            }
+        };
+    </script>
+</body>
+</html>

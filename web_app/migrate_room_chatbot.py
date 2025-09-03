@@ -24,7 +24,7 @@ def migrate_database():
             
             print("🔄 开始数据库迁移：添加chatbot_enabled字段...")
             
-            # 使用SQLite的ALTER TABLE添加字段
+            # 使用SQLite的ALTER TABLE添加字段 - SQLAlchemy 1.4语法 (Python 3.6兼容)
             db.engine.execute('ALTER TABLE room ADD COLUMN chatbot_enabled BOOLEAN DEFAULT 0')
             
             print("✅ 数据库迁移完成！chatbot_enabled字段已添加")

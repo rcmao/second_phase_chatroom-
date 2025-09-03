@@ -1,0 +1,4 @@
+metric,n_rooms,mean_diff,t_test_p
+diff_share (female_share-expected),15,-0.04630305591384671,0.10398821012209628
+log_ratio_percap (per-capita msgs),15,-0.3198786941320302,0.05535985466787953
+diff_no_reply_rate (120s),15,-0.00816498378213833,0.6178740398350187

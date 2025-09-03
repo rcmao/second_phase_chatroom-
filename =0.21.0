@@ -1,0 +1,18 @@
+Looking in indexes: http://mirrors.cloud.aliyuncs.com/pypi/simple/
+Collecting pytest
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/29/16/c8a903f4c4dffe7a12843191437d7cd8e32751d5de349d45d3fe69544e87/pytest-8.4.1-py3-none-any.whl (365 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 365.5/365.5 kB 15.3 MB/s eta 0:00:00
+Collecting pytest-asyncio
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/c7/9d/bf86eddabf8c6c9cb1ea9a869d6873b46f105a5d292d3a6f7071f5b07935/pytest_asyncio-1.1.0-py3-none-any.whl (15 kB)
+Collecting iniconfig>=1 (from pytest)
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/2c/e1/e6716421ea10d38022b952c159d5161ca1193197fb744506875fbb87ea7b/iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+Collecting packaging>=20 (from pytest)
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl (66 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.5/66.5 kB 3.0 MB/s eta 0:00:00
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl (20 kB)
+Collecting pygments>=2.7.2 (from pytest)
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl (1.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 22.6 MB/s eta 0:00:00
+Installing collected packages: pygments, pluggy, packaging, iniconfig, pytest, pytest-asyncio
+Successfully installed iniconfig-2.1.0 packaging-25.0 pluggy-1.6.0 pygments-2.19.2 pytest-8.4.1 pytest-asyncio-1.1.0
