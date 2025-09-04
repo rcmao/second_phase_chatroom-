@@ -93,7 +93,7 @@ def main():
     print("🔧 添加新的普通用户账号")
     print("=" * 40)
     
-    # 检查数据库连接
+    # 检查数据库连接 - SQLAlchemy 1.4语法 (Python 3.6兼容)
     with app.app_context():
         try:
             db.engine.execute('SELECT 1')

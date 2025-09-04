@@ -723,9 +723,9 @@ class SmartInterventionEngine:
         self.room_last_agenda_transition = defaultdict(float)
         
         # === 行为检测参数 ===
-        self.silence_threshold = int(os.getenv('SILENCE_THRESHOLD', '60'))
+        self.silence_threshold = int(os.getenv('SILENCE_THRESHOLD', '90'))  # 个人沉默改为90秒
         self.global_cooldown_seconds = int(os.getenv('GLOBAL_COOLDOWN', '30'))
-        self.agenda_transition_threshold = int(os.getenv('AGENDA_TRANSITION_THRESHOLD', '30'))
+        self.agenda_transition_threshold = int(os.getenv('AGENDA_TRANSITION_THRESHOLD', '60'))  # 群体沉默改为60秒
         self.agenda_transition_cooldown = int(os.getenv('AGENDA_TRANSITION_COOLDOWN', '60'))
         
         # === 干预模板 ===
@@ -1720,7 +1720,7 @@ class SmartInterventionEngine:
         # === 🟡 优先级2：冲突检测（上下文相关）===
         if self.detection_mode in ['conflict', 'hybrid']:
             if self.conflict_detector.should_intervene(context_analysis):
-                # 仅允许“当前或最近两条消息”触发的冲突进入（避免误报）
+                # 仅允许"当前或最近两条消息"触发的冲突进入（避免误报）
                 if not self._recent_conflict_triggered(room_id, window=2):
                     return InterventionDecision(should_intervene=False)
                 # 检查冷却
@@ -2226,7 +2226,7 @@ class SmartInterventionEngine:
         recent_messages = list(self.room_recent_messages.get(room_id, []))
         
         # 过滤掉admin消息，只看普通用户消息
-        non_admin_messages = [msg for msg in recent_messages if not self._is_admin_user(str(msg['user_id']))]
+        non_admin_messages = [msg for msg in recent_messages if not self._is_admin_user(str(msg['user_id')))]
         print(f"🔍 [沉默检测] 房间{room_id} 总消息: {len(recent_messages)}, 非admin消息: {len(non_admin_messages)}")
         
         # 需要至少3轮对话后才开始沉默检测（约等于≥6条非admin消息）
@@ -2425,7 +2425,7 @@ class SmartInterventionEngine:
         recent_messages = list(self.room_recent_messages.get(room_id, []))
         
         # 过滤掉admin消息，只看普通用户消息
-        non_admin_messages = [msg for msg in recent_messages if not self._is_admin_user(str(msg['user_id']))]
+        non_admin_messages = [msg for msg in recent_messages if not self._is_admin_user(str(msg['user_id')))]
         
         # 群体沉默（与破冰不同）：需要至少2条非admin用户消息后才进入"群体沉默引导"判定
         min_msgs_for_group_silence = 2
@@ -2531,7 +2531,7 @@ class SmartInterventionEngine:
         recent_messages = list(self.room_recent_messages.get(room_id, []))
         
         # 过滤掉admin消息，只看普通用户消息
-        non_admin_messages = [msg for msg in recent_messages if not self._is_admin_user(str(msg['user_id']))]
+        non_admin_messages = [msg for msg in recent_messages if not self._is_admin_user(str(msg['user_id')))]
         
         # 需要至少3轮对话后才考虑结构引导
         min_messages_for_detection = 3
