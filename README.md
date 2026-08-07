@@ -1,281 +1,192 @@
-# TKI智能干预聊天机器人系统
+# TKI Intelligent Chatroom Intervention System
 
-一个基于Flask和WebSocket的智能聊天室系统，集成了先进的AI干预引擎，专门用于足球话题讨论的智能管理和引导。
+This repository contains a Flask and WebSocket-based chatroom system with an AI-assisted intervention engine for moderating and guiding football discussion tasks. The system was designed for controlled group-chat studies in which an automated moderator can detect silence, conflict, topic drift, and sustained floor dominance, then generate lightweight interventions.
 
-## 🎯 核心功能
+## Key Features
 
-### 智能干预引擎 (SmartInterventionEngine)
+### Smart Intervention Engine
 
-#### 🔍 实时内容检测
-- **毒性检测**: 使用GPT-4智能识别中文足球讨论中的冒犯性内容
-- **关键词匹配**: 本地词库检测，支持轻度/中度/严重三级分类
-- **冲突升级预警**: 检测连续冲突消息和激烈争吵
-- **话题偏离检测**: 智能判断讨论是否偏离足球主题
+- Toxicity detection: identifies potentially offensive content in Chinese football discussions using a hybrid keyword and LLM-based workflow.
+- Keyword matching: supports local detection rules with mild, moderate, and severe categories.
+- Conflict escalation detection: monitors rapid exchanges and repeated hostile turns.
+- Topic drift detection: checks whether discussion is moving away from the football task.
+- Structured intervention generation: produces brief prompts for silence invitations, agenda transitions, structure guidance, and conflict interruption.
 
-#### 🛡️ 渐进式治理
-- **分级干预**: 提醒 → 警告 → 严肃警告（取消禁言功能）
-- **用户行为追踪**: 按房间+用户累计违规，支持时间窗清零
-- **节流机制**: 防止重复提醒，每人30秒冷却
-- **去重保护**: 避免同一内容短时间重复计数
+### Real-Time Monitoring
 
-#### 💬 智能引导
-- **沉默邀请**: 检测用户沉默，智能邀请参与讨论
-- **议程过渡**: 群体沉默时主动开启新话题
-- **结构引导**: 防止单用户连续发言，促进轮流讨论
-- **话题拉回**: 偏离主题时温和引导回足球话题
+- Periodic scanning: scans active rooms at a configurable interval.
+- Silence monitoring: detects individual silence and group-level lulls.
+- Intervention cooldowns: prevents repeated or overly frequent prompts.
+- Room state tracking: monitors active rooms, message counts, and recent intervention history.
+- Admin feedback: records intervention actions and runtime status for administrators.
 
-#### 🤖 LLM集成
-- **智能文案生成**: 使用GPT生成自然、温和的干预消息
-- **多场景适配**: 沉默邀请、冲突提醒、话题引导等
-- **语气净化**: 自动清理轻佻口吻、重复标点、侮辱词
-- **失败回退**: LLM失败时使用预设模板兜底
+### Web Chatroom
 
-### 实时监控系统 (RealtimeMonitor)
+- Multi-room chat interface.
+- Role-based user and admin views.
+- WebSocket message delivery.
+- Optional LLM-powered moderation and message generation.
+- Configurable intervention style and detection thresholds.
 
-#### 📊 主动监控
-- **定时扫描**: 每10秒扫描所有活跃房间
-- **多维度检测**: 沉默、话题偏离、议程需要
-- **智能触发**: 不依赖消息，主动发现干预机会
-- **状态追踪**: 实时监控房间状态和用户行为
+## System Overview
 
-#### 🎛️ 监控管理
-- **房间管理**: 动态添加/移除监控房间
-- **冷却控制**: 防止频繁干预，支持全局和专项冷却
-- **状态显示**: 终端实时显示监控状态
-- **错误处理**: 房间连续错误时自动移除监控
-
-#### 📈 统计分析
-- **干预统计**: 记录总扫描次数和干预次数
-- **房间状态**: 详细显示每个房间的沉默时长、消息数等
-- **管理员通知**: 实时向管理员发送监控状态
-- **性能监控**: 监控系统运行状态和性能指标
-
-## 🏗️ 系统架构
-
-### 核心组件
-```
+```text
 SmartInterventionEngine
-├── 内容检测模块
-│   ├── LLM毒性检测
-│   ├── 关键词匹配
-│   ├── 冲突升级检测
-│   └── 话题偏离检测
-├── 干预生成模块
-│   ├── 沉默邀请
-│   ├── 议程过渡
-│   ├── 结构引导
-│   └── 话题拉回
-├── 治理控制模块
-│   ├── 渐进式分级
-│   ├── 用户行为追踪
-│   ├── 节流去重
-│   └── 冷却管理
-└── LLM集成模块
-    ├── 智能文案生成
-    ├── 语气净化
-    └── 失败回退
+├── Detection
+│   ├── LLM toxicity detection
+│   ├── Keyword matching
+│   ├── Conflict escalation detection
+│   └── Topic drift detection
+├── Intervention generation
+│   ├── Silence invitation
+│   ├── Agenda transition
+│   ├── Structure guidance
+│   └── Topic pullback
+├── Governance control
+│   ├── Progressive warning stages
+│   ├── User behavior tracking
+│   ├── Throttling and deduplication
+│   └── Cooldown management
+└── LLM integration
+    ├── Message generation
+    ├── Tone cleanup
+    └── Fallback templates
 
 RealtimeMonitor
-├── 监控循环
-│   ├── 定时扫描
-│   ├── 房间状态检查
-│   └── 干预触发
-├── 状态管理
-│   ├── 房间管理
-│   ├── 冷却控制
-│   └── 错误处理
-└── 统计分析
-    ├── 干预统计
-    ├── 状态报告
-    └── 管理员通知
+├── Monitoring loop
+│   ├── Scheduled scans
+│   ├── Room state checks
+│   └── Intervention triggers
+├── State management
+│   ├── Active room management
+│   ├── Cooldown control
+│   └── Error handling
+└── Reporting
+    ├── Intervention statistics
+    ├── Status summaries
+    └── Admin notifications
 ```
 
-### 数据流
-1. **消息接收** → 智能引擎分析 → 生成干预结果
-2. **定时扫描** → 监控系统检测 → 主动触发干预
-3. **干预执行** → 数据库存储 → WebSocket广播
-4. **状态更新** → 统计记录 → 管理员通知
+## Data Flow
 
-## 🚀 快速开始
+1. A user message is received by the chatroom.
+2. The intervention engine analyzes the message and recent room context.
+3. The engine decides whether an intervention is needed.
+4. If triggered, the system generates or selects an intervention message.
+5. The message is stored and broadcast to the room through WebSocket.
+6. The monitor updates room-level state and intervention statistics.
 
-### 环境要求
-- Python 3.8+
+## Getting Started
+
+### Requirements
+
+- Python 3.8 or later
 - Flask
 - Flask-SocketIO
-- OpenAI API (可选，用于LLM功能)
+- Flask-SQLAlchemy
+- Optional OpenAI-compatible API endpoint for LLM-based detection and intervention generation
 
-### 安装依赖
+Install dependencies:
+
 ```bash
-pip install -r requirements.txt
+pip install -r web_app/requirements.txt
 ```
 
-### 环境配置
-```bash
-# 复制环境变量模板
-cp env.example .env
+### Configuration
 
-# 配置必要的环境变量
-OPENAI_API_KEY=your_openai_api_key  # 可选，用于LLM功能
-INTERVENTION_TONE=warm              # 干预语气：warm/neutral
-FOOTBALL_ON_TOPIC_RATIO=0.2         # 足球话题检测阈值
-GLOBAL_COOLDOWN=30                  # 全局冷却时间(秒)
-LLM_TOXICITY_ENABLED=true           # 启用LLM毒性检测
-LLM_INTERVENTION_ENABLED=true       # 启用LLM干预文案
+Copy the example environment file and fill in local values:
+
+```bash
+cp web_app/env.example web_app/.env
 ```
 
-### 启动系统
+Common configuration options include:
+
 ```bash
-# 启动Web应用
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_BASE_URL=https://api.openai.com/v1
+LLM_TOXICITY_ENABLED=true
+LLM_INTERVENTION_ENABLED=true
+LLM_TOXICITY_MODEL=gpt-4o-mini
+LLM_MESSAGE_MODEL=gpt-4o-mini
+GLOBAL_COOLDOWN=30
+FOOTBALL_ON_TOPIC_RATIO=0.3
+INTERVENTION_TONE=warm
+```
+
+Do not commit `.env` files, local databases, logs, or exported participant records.
+
+### Run the Web App
+
+From the `web_app` directory:
+
+```bash
+cd web_app
 python app.py
-
-# 或使用启动脚本
-./start_web.py
 ```
 
-## ⚙️ 配置说明
+You can also use the included startup scripts when deploying to a server:
 
-### 干预参数
-- `silence_threshold`: 个人沉默阈值 (默认60秒)
-- `agenda_transition_threshold`: 群体沉默阈值 (默认30秒)
-- `global_cooldown_seconds`: 全局冷却时间 (默认30秒)
-- `warn_stage_threshold`: 警告阶段阈值 (默认2次)
-- `mute_stage_threshold`: 严肃警告阈值 (默认3次)
-
-### 监控参数
-- `scan_interval`: 监控扫描间隔 (默认10秒)
-- `max_silence_before_action`: 沉默触发阈值 (默认45秒)
-- `status_display_interval`: 状态显示间隔 (默认30秒)
-
-### LLM配置
-- `llm_model`: 毒性检测模型 (默认gpt-4o-mini)
-- `llm_message_model`: 文案生成模型 (默认gpt-4o-mini)
-- `llm_timeout`: API超时时间 (默认5秒)
-- `llm_conf_threshold`: 置信度阈值 (默认0.5)
-
-## 📊 监控界面
-
-### 终端监控
-系统在终端实时显示监控状态：
-```
-🎯 [14:30:15] 实时监控总览 - 扫描#123
-   📊 活跃房间: 2个
-   🤖 总干预次数: 15次
-   ⏱️ 扫描间隔: 10秒
-   🎚️ 沉默阈值: 45秒
-
-🔍 房间1 ✅ 用户沉默: 25s/45s
-🔍 房间2 🚨 用户沉默: 50s/45s
+```bash
+./start_production.sh
 ```
 
-### 详细状态显示
-```
-🔍 房间 1 - 实时检测状态 [14:30:15]
-==========================================
-📊 基本信息:
-   总消息数: 25
-   用户消息: 20
-   用户沉默: 25秒
-   沉默阈值: 45秒
+## Main Configuration Parameters
 
-🤫 沉默检测:
-   状态: ✅ 用户参与正常
+- `SILENCE_THRESHOLD`: individual silence threshold in seconds.
+- `AGENDA_TRANSITION_THRESHOLD`: group-level silence threshold for agenda transitions.
+- `GLOBAL_COOLDOWN`: global minimum interval between interventions.
+- `GUIDANCE_COOLDOWN`: cooldown for structure-guidance interventions.
+- `FOOTBALL_ON_TOPIC_RATIO`: keyword-ratio threshold for football-topic detection.
+- `LLM_TOXICITY_ENABLED`: enables LLM-assisted toxicity detection.
+- `LLM_INTERVENTION_ENABLED`: enables LLM-generated intervention wording.
+- `INTERVENTION_TONE`: sets intervention tone, such as `warm` or `neutral`.
 
-🎯 议程过渡:
-   状态: ✅ 话题流畅
+## Intervention Types
 
-💬 活跃讨论:
-   状态: 🔥 讨论活跃
+### Silence Invitation
 
-⚽ 话题检测:
-   状态: ⚽ 在足球话题内
-```
+Triggered when a participant has been silent beyond the configured threshold. The system invites the participant to share a view without speaking on their behalf.
 
-## 🔧 API接口
+### Agenda Transition
 
-### 智能干预引擎
-```python
-# 分析消息并生成干预
-result = engine.analyze_message(
-    room_id="1",
-    user_id="2", 
-    username="Lily",
-    message_content="皇马是垃圾球队",
-    gender="female"
-)
+Triggered when the group conversation stalls. The system proposes a new football-related angle or discussion prompt.
 
-# 检查用户禁言状态
-is_muted, remaining_seconds = engine.is_user_muted("1", "2")
+### Structure Guidance
 
-# 获取房间统计
-stats = engine.get_room_stats("1")
-```
+Triggered when one participant sends several consecutive messages or when the conversational floor becomes too concentrated. The system asks the group to return to a more balanced turn structure.
 
-### 实时监控系统
-```python
-# 添加房间监控
-monitor.add_active_room("1")
+### Conflict Interruption
 
-# 启动监控
-monitor.start_monitoring()
+Triggered when the system detects offensive language, escalating conflict, or a high-risk exchange. The system posts a brief reminder to keep the discussion respectful.
 
-# 获取监控统计
-stats = monitor.get_monitor_stats()
+### Topic Pullback
+
+Triggered when the discussion drifts away from the assigned football topic. The system redirects the group toward the task.
+
+## Repository Structure
+
+```text
+web_app/                  Main Flask chatroom application
+web_app/templates/        HTML templates
+web_app/static/           Static assets
+web_app/app.py            Main web application
+web_app/realtime_monitor.py
+web_app/smart_intervention_engine.py
+config/                   Example configuration files
+src/                      Experimental core modules and utilities
+scripts/                  Utility and deployment scripts
+examples/                 Basic usage examples
 ```
 
-## 🎨 干预类型
+## Privacy Notice
 
-### 沉默邀请 (SILENCE_INVITATION)
-- **触发条件**: 用户沉默超过60秒
-- **示例**: "@Lily，也来聊聊你的看法吧～"
+This public repository is intended to contain source code and configuration templates only. Participant chat logs, interview transcripts, exported records, local database files, local environment files, and other study data should not be committed to this repository.
 
-### 议程过渡 (AGENDA_TRANSITION)  
-- **触发条件**: 群体沉默超过30秒
-- **示例**: "刚才关于传控的讨论很精彩，现在来说说新援表现怎么样？"
+## License
 
-### 结构引导 (STRUCTURE_GUIDANCE)
-- **触发条件**: 单用户连续发言4条或话题偏离
-- **示例**: "我们按顺序来一轮：每人用一句话说'最伟大的球队是谁'"
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
 
-### 冲突中断 (CONFLICT_INTERRUPTION)
-- **触发条件**: 检测到冒犯性语言或激烈争吵
-- **示例**: "@Lily 请避免使用可能冒犯的外号哦～"
+## Support
 
-## 🔒 安全特性
-
-- **渐进式治理**: 从温和提醒到严肃警告
-- **用户保护**: 防止误判和过度干预
-- **冷却机制**: 避免频繁打扰用户
-- **去重保护**: 防止重复干预
-- **错误恢复**: 系统异常时自动恢复
-
-## 📝 日志记录
-
-系统提供详细的日志记录：
-- 干预触发原因和结果
-- LLM调用状态和响应
-- 监控扫描统计
-- 错误和异常信息
-- 用户行为分析
-
-## 🤝 贡献指南
-
-1. Fork 项目
-2. 创建功能分支
-3. 提交更改
-4. 推送到分支
-5. 创建 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 🆘 支持
-
-如有问题或建议，请：
-- 查看 [Issues](../../issues) 
-- 提交新的 Issue
-- 联系开发团队
-
----
-
-**TKI智能干预聊天机器人系统** - 让足球讨论更友好、更智能 🚀 
+For questions or issues, please open an issue in this repository or contact the project maintainers.

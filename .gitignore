@@ -50,6 +50,24 @@ Thumbs.db
 # Logs
 *.log
 
+# Local runtime data and secrets
+*.db
+*.sqlite
+*.sqlite3
+*.pid
+.env.*
+!.env.example
+!*.env.example
+
+# Study data and exported participant records
+第一阶段聊天记录/
+第二阶段聊天记录/
+第二阶段采访记录/
+*聊天记录*/
+*采访记录*/
+chat_history_*.txt
+@analysis/results/messages_parsed.csv
+
 # Project specific folders
 plan/
 related_work/ 
