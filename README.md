@@ -4,9 +4,9 @@ This repository contains the source code for Chime, an interruptive chatbot and 
 
 Chime was designed as a rule-governed AI moderator for synchronous text-based group chats. It monitors interactional signals such as silence, safety risks, sustained dominance, and topic drift, then posts brief public interventions that reopen conversational space without speaking on behalf of participants or judging the correctness of their football opinions.
 
-## Alignment With the Paper
+## Intervention Functions
 
-The system implementation corresponds to the paper's three intervention functions:
+Chime is organized around three intervention functions:
 
 - KF1 Activation: legitimizes entry into the discussion through silent invitations, icebreakers, and agenda transitions.
 - KF2 Safety: reduces expressive risk through gentle toxicity reminders, conflict de-escalation, and emergency-brake messages.

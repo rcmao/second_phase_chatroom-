@@ -1,6 +1,6 @@
 # Project Files
 
-This document gives a concise map of the repository. Public documentation follows the Chime/KF1-KF3 terminology used in the paper.
+This document gives a concise map of the repository. Public documentation follows the Chime/KF1-KF3 terminology used by the system.
 
 ## Repository Overview
 
@@ -28,7 +28,7 @@ Main Flask application. It handles routing, authentication, room management, mes
 web_app/smart_intervention_engine.py
 ```
 
-Core Chime intervention engine. It implements the paper-aligned intervention logic:
+Core Chime intervention engine. It implements the Chime intervention logic:
 
 - KF1 Activation: silent invitation, icebreaker, agenda transition.
 - KF2 Safety: toxicity reminder, conflict de-escalation, emergency brake.
@@ -72,7 +72,7 @@ Example environment configuration. Copy this to `.env` locally. Do not commit re
 src/
 ```
 
-Experimental core modules and utilities retained from earlier development. The public paper-aligned runtime is represented primarily by `web_app/app.py`, `web_app/smart_intervention_engine.py`, and `web_app/realtime_monitor.py`.
+Experimental core modules and utilities retained from earlier development. The public runtime is represented primarily by `web_app/app.py`, `web_app/smart_intervention_engine.py`, and `web_app/realtime_monitor.py`.
 
 ```text
 config/

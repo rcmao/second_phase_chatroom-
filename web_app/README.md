@@ -2,7 +2,7 @@
 
 This directory contains the Flask web application used to run the Chime chatroom. The app provides synchronous multi-room text chat, participant/admin views, and the runtime integration point for Chime's KF1-KF3 intervention policy.
 
-## Paper-Aligned Functions
+## Intervention Functions
 
 - KF1 Activation: silent invitations, icebreakers, and agenda transitions.
 - KF2 Safety: gentle toxicity reminders, conflict de-escalation, and emergency-brake messages.
