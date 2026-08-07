@@ -1,4 +1,4 @@
-# TKI Intelligent Chatroom Intervention System
+# Chime Chatroom Interruptive Chatbot
 
 This repository contains a Flask and WebSocket-based chatroom system with an AI-assisted intervention engine for moderating and guiding football discussion tasks. The system was designed for controlled group-chat studies in which an automated moderator can detect silence, conflict, topic drift, and sustained floor dominance, then generate lightweight interventions.
 
