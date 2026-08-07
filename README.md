@@ -1,80 +1,111 @@
 # Chime Chatroom Interruptive Chatbot
 
-This repository contains a Flask and WebSocket-based chatroom system with an AI-assisted intervention engine for moderating and guiding football discussion tasks. The system was designed for controlled group-chat studies in which an automated moderator can detect silence, conflict, topic drift, and sustained floor dominance, then generate lightweight interventions.
+This repository contains the source code for Chime, an interruptive chatbot and web-based group chatroom system used to support more balanced participation in controlled football-discussion sessions.
 
-## Key Features
+Chime was designed as a rule-governed AI moderator for synchronous text-based group chats. It monitors interactional signals such as silence, safety risks, sustained dominance, and topic drift, then posts brief public interventions that reopen conversational space without speaking on behalf of participants or judging the correctness of their football opinions.
 
-### Smart Intervention Engine
+## Alignment With the Paper
 
-- Toxicity detection: identifies potentially offensive content in Chinese football discussions using a hybrid keyword and LLM-based workflow.
-- Keyword matching: supports local detection rules with mild, moderate, and severe categories.
-- Conflict escalation detection: monitors rapid exchanges and repeated hostile turns.
-- Topic drift detection: checks whether discussion is moving away from the football task.
-- Structured intervention generation: produces brief prompts for silence invitations, agenda transitions, structure guidance, and conflict interruption.
+The system implementation corresponds to the paper's three intervention functions:
 
-### Real-Time Monitoring
+- KF1 Activation: legitimizes entry into the discussion through silent invitations, icebreakers, and agenda transitions.
+- KF2 Safety: reduces expressive risk through gentle toxicity reminders, conflict de-escalation, and emergency-brake messages.
+- KF3 Structure: creates floor-release moments through turn-taking reminders and football-topic pullbacks.
 
-- Periodic scanning: scans active rooms at a configurable interval.
-- Silence monitoring: detects individual silence and group-level lulls.
-- Intervention cooldowns: prevents repeated or overly frequent prompts.
-- Room state tracking: monitors active rooms, message counts, and recent intervention history.
-- Admin feedback: records intervention actions and runtime status for administrators.
+In the study, the Treatment condition used Chime with KF1-KF3 enabled, while the Control condition used the same chatroom without Chime interventions.
 
-### Web Chatroom
+## Core Functions
 
-- Multi-room chat interface.
-- Role-based user and admin views.
-- WebSocket message delivery.
-- Optional LLM-powered moderation and message generation.
-- Configurable intervention style and detection thresholds.
+### KF1 Activation
 
-## System Overview
+KF1 targets entry legitimacy. It helps participants enter or re-enter the conversational floor when the discussion has not started, has stalled, or when an individual participant has remained silent for a sustained period.
+
+Implemented message types:
+
+- Silent invitation: a targeted @mention inviting a silent participant to share a view.
+- Icebreaker: an opening prompt when no participant has spoken yet.
+- Agenda transition: a football-related prompt when the group discussion stalls.
+
+### KF2 Safety
+
+KF2 targets expressive safety. It is used when the system detects potentially hostile, exclusionary, or escalating exchanges. The goal is de-escalation, not punishment.
+
+Implemented message types:
+
+- Gentle toxicity reminder: a brief non-punitive reminder after mild risk.
+- Conflict de-escalation: a short message redirecting participants back to football arguments rather than personal attacks.
+- Emergency brake: a stronger pause-and-reset message for escalating conflict.
+
+### KF3 Structure
+
+KF3 targets floor release. It interrupts sustained floor occupation and reopens transition points so that other participants can enter the conversation.
+
+Implemented message types:
+
+- Turn-taking reminder: a brief prompt when one participant sends several consecutive messages.
+- Topic pullback: a smooth redirect when the conversation drifts away from the football task.
+
+## Intervention Policy
+
+Chime follows a four-stage moderation pipeline:
 
 ```text
-SmartInterventionEngine
-├── Detection
-│   ├── LLM toxicity detection
-│   ├── Keyword matching
-│   ├── Conflict escalation detection
-│   └── Topic drift detection
-├── Intervention generation
-│   ├── Silence invitation
-│   ├── Agenda transition
-│   ├── Structure guidance
-│   └── Topic pullback
-├── Governance control
-│   ├── Progressive warning stages
-│   ├── User behavior tracking
-│   ├── Throttling and deduplication
-│   └── Cooldown management
-└── LLM integration
-    ├── Message generation
-    ├── Tone cleanup
-    └── Fallback templates
+Module A: Sensing
+  Message stream -> interactional signals
+  Signals include silence, dominance, toxicity/conflict risk, and topic drift.
 
-RealtimeMonitor
-├── Monitoring loop
-│   ├── Scheduled scans
-│   ├── Room state checks
-│   └── Intervention triggers
-├── State management
-│   ├── Active room management
-│   ├── Cooldown control
-│   └── Error handling
-└── Reporting
-    ├── Intervention statistics
-    ├── Status summaries
-    └── Admin notifications
+Module B: Reasoning
+  Signals -> candidate intents
+  Candidate intents map to KF1, KF2, or KF3.
+
+Module C: Arbitration
+  Candidate intents + current room context -> at most one approved intervention
+  Safety-first priority and cooldown rules limit over-interruption.
+
+Module D: Generation
+  Approved intent + minimal context -> brief guardrailed Chime message
+  Messages are generated from structured templates with fallback wording.
 ```
 
-## Data Flow
+Priority order:
 
-1. A user message is received by the chatroom.
-2. The intervention engine analyzes the message and recent room context.
-3. The engine decides whether an intervention is needed.
-4. If triggered, the system generates or selects an intervention message.
-5. The message is stored and broadcast to the room through WebSocket.
-6. The monitor updates room-level state and intervention statistics.
+```text
+KF2 Safety > KF3 Structure > KF1 Activation
+```
+
+This means safety-related interventions take precedence when multiple triggers are present. If the discussion is active, Chime favors structure-related intervention over activation prompts; if the discussion is inactive, Chime favors activation.
+
+## Trigger Conditions
+
+The study used task-calibrated thresholds for a 15-minute, three-person football chat:
+
+| Trigger family | Module | Condition |
+| --- | --- | --- |
+| Individual silence | KF1 | A participant is silent for at least 90 seconds after chat has started. |
+| Group silence | KF1 | Icebreaker if no participant has spoken and group silence exceeds 45 seconds. |
+| Group lull | KF1 | Agenda transition if an ongoing discussion stalls for at least 60 seconds. |
+| Safety risk | KF2 | Toxicity keyword hit or LLM-classified toxicity/conflict escalation. |
+| Sustained dominance | KF3 | One participant sends at least 4 consecutive messages. |
+| Topic drift | KF3 | Conversation is flagged as no longer mainly football-related. |
+
+Cooldowns and throttles:
+
+- Global cooldown: 30 seconds.
+- KF1 per-user cooldown: 120 seconds.
+- KF3 shared cooldown: 180 seconds.
+- Agenda transition cooldown: 60 seconds.
+- Conflict throttle: 30 seconds.
+
+## Web Chatroom
+
+The repository also includes the web chatroom used to deploy Chime in experimental sessions:
+
+- Multi-room text chat interface.
+- Participant and administrator views.
+- WebSocket-based real-time message delivery.
+- Admin controls for rooms and users.
+- Optional OpenAI-compatible API integration for classification and message generation.
+- Local fallback templates when LLM calls fail.
 
 ## Getting Started
 
@@ -84,7 +115,7 @@ RealtimeMonitor
 - Flask
 - Flask-SocketIO
 - Flask-SQLAlchemy
-- Optional OpenAI-compatible API endpoint for LLM-based detection and intervention generation
+- Optional OpenAI-compatible API endpoint for LLM-based classification and message generation
 
 Install dependencies:
 
@@ -100,7 +131,7 @@ Copy the example environment file and fill in local values:
 cp web_app/env.example web_app/.env
 ```
 
-Common configuration options include:
+Common configuration options:
 
 ```bash
 OPENAI_API_KEY=your_openai_api_key
@@ -114,7 +145,7 @@ FOOTBALL_ON_TOPIC_RATIO=0.3
 INTERVENTION_TONE=warm
 ```
 
-Do not commit `.env` files, local databases, logs, or exported participant records.
+Do not commit `.env` files, local databases, logs, exported chat records, interview transcripts, or any participant data.
 
 ### Run the Web App
 
@@ -125,44 +156,11 @@ cd web_app
 python app.py
 ```
 
-You can also use the included startup scripts when deploying to a server:
+Production helper scripts are included for server deployment:
 
 ```bash
 ./start_production.sh
 ```
-
-## Main Configuration Parameters
-
-- `SILENCE_THRESHOLD`: individual silence threshold in seconds.
-- `AGENDA_TRANSITION_THRESHOLD`: group-level silence threshold for agenda transitions.
-- `GLOBAL_COOLDOWN`: global minimum interval between interventions.
-- `GUIDANCE_COOLDOWN`: cooldown for structure-guidance interventions.
-- `FOOTBALL_ON_TOPIC_RATIO`: keyword-ratio threshold for football-topic detection.
-- `LLM_TOXICITY_ENABLED`: enables LLM-assisted toxicity detection.
-- `LLM_INTERVENTION_ENABLED`: enables LLM-generated intervention wording.
-- `INTERVENTION_TONE`: sets intervention tone, such as `warm` or `neutral`.
-
-## Intervention Types
-
-### Silence Invitation
-
-Triggered when a participant has been silent beyond the configured threshold. The system invites the participant to share a view without speaking on their behalf.
-
-### Agenda Transition
-
-Triggered when the group conversation stalls. The system proposes a new football-related angle or discussion prompt.
-
-### Structure Guidance
-
-Triggered when one participant sends several consecutive messages or when the conversational floor becomes too concentrated. The system asks the group to return to a more balanced turn structure.
-
-### Conflict Interruption
-
-Triggered when the system detects offensive language, escalating conflict, or a high-risk exchange. The system posts a brief reminder to keep the discussion respectful.
-
-### Topic Pullback
-
-Triggered when the discussion drifts away from the assigned football topic. The system redirects the group toward the task.
 
 ## Repository Structure
 
